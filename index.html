@@ -44,6 +44,7 @@
     import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
     let csv_data = await d3.csv("sg.csv");
+    let state = "play";
 
     function get_data(year) {
         let data = csv_data.filter(d => d.year === current_year)[0]
@@ -206,12 +207,27 @@
             .text(`60 years and older population percentage: ${(data.filter(d => d.age >= "61-70").reduce((a, b) => a + b.total, 0) / total_population * 100).toFixed(2)}%`);
     }
 
+    function update_state(new_state) {
+        state = new_state;
+        if (state === "stop") {
+            d3.select("#year-select").attr("disabled", null);
+            d3.select("#play-button").attr("disabled", null);
+        } else {
+            d3.select("#year-select").attr("disabled", "disabled");
+            d3.select("#play-button").attr("disabled", "disabled");
+        }
+    }
+
     function play_animation() {
+        update_state("play");
         for (let i = 2010; i <= 2022; i++) {
             setTimeout(function () {
                 update_value(String(i));
             }, 600 * (i - 2010));
         }
+        setTimeout(function () {
+            update_state("stop");
+        }, 600 * (2022 - 2010) + 500);
     }
 
     play_animation();
