@@ -112,7 +112,7 @@
     let svg = d3.select("svg").attr("width", svgSize.width).attr("height", svgSize.height);
 
     const xScale = d3.scaleLinear()
-        .domain([0, d3.max(data, d => d.total)])
+        .domain([0, 650000])
         .range([0, chartWidth]);
 
     const yScale = d3.scaleBand()
