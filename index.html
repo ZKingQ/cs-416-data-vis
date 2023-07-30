@@ -50,53 +50,54 @@
         let total_population = parseInt(data["Total Residents"].replaceAll(",", ""));
         data = [
             {
-                age: "0-10",
+                age: "0-9",
                 total: parseInt(data["0 - 4 Years"].replaceAll(",", "")) + parseInt(data["5 - 9 Years"].replaceAll(",", ""))
             },
             {
-                age: "11-20",
+                age: "10-19",
                 total: parseInt(data["10 - 14 Years"].replaceAll(",", "")) + parseInt(data["15 - 19 Years"].replaceAll(",", ""))
             },
             {
-                age: "21-30",
+                age: "20-29",
                 total: parseInt(data["20 - 24 Years"].replaceAll(",", "")) + parseInt(data["25 - 29 Years"].replaceAll(",", ""))
             },
             {
-                age: "31-40",
+                age: "30-39",
                 total: parseInt(data["30 - 34 Years"].replaceAll(",", "")) + parseInt(data["35 - 39 Years"].replaceAll(",", ""))
             },
             {
-                age: "41-50",
+                age: "40-49",
                 total: parseInt(data["40 - 44 Years"].replaceAll(",", "")) + parseInt(data["45 - 49 Years"].replaceAll(",", ""))
             },
             {
-                age: "51-60",
+                age: "50-59",
                 total: parseInt(data["50 - 54 Years"].replaceAll(",", "")) + parseInt(data["55 - 59 Years"].replaceAll(",", ""))
             },
             {
-                age: "61-70",
+                age: "60-69",
                 total: parseInt(data["60 - 64 Years"].replaceAll(",", "")) + parseInt(data["65 - 69 Years"].replaceAll(",", ""))
             },
             {
-                age: "71-80",
+                age: "70-79",
                 total: parseInt(data["70 - 74 Years"].replaceAll(",", "")) + parseInt(data["75 - 79 Years"].replaceAll(",", ""))
             },
             {
-                age: "81-90",
+                age: "80-89",
                 total: parseInt(data["80 - 84 Years"].replaceAll(",", "")) + parseInt(data["85 - 89 Years"].replaceAll(",", ""))
             },
-            {age: "91 and above", total: parseInt(data["90 Years & Over"].replaceAll(",", ""))},
+            {age: "90 and above", total: parseInt(data["90 Years & Over"].replaceAll(",", ""))},
         ];
         return [data, total_population];
     }
 
     let current_year = d3.select("#year-select").property("value");
+    console.log(current_year);
     let [data, total_population] = get_data(current_year)
 
 
     const svgSize = {
         width: 960,
-        height: 960
+        height: 500
     };
 
     const chartMargin = {
@@ -212,6 +213,7 @@
             }, 600 * (i - 2010));
         }
     }
+
     play_animation();
 
     d3.select("#play-button").on("click", function () {
