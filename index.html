@@ -167,7 +167,7 @@
 
     // highlight the bar for the age group that large than 60 years old
     svg.selectAll("rect")
-        .filter(d => d.age >= "61-70")
+        .filter(d => d.age >= "60-69")
         .attr("fill", "red");
 
     // show total population
@@ -185,7 +185,7 @@
         .attr("y", chartMargin.bottom + chartHeight - 10)
         .attr("font-size", "20px")
         .attr("fill", "red")
-        .text(`60 years and older population percentage: ${(data.filter(d => d.age >= "61-70").reduce((a, b) => a + b.total, 0) / total_population * 100).toFixed(2)}%`);
+        .text(`60 years and older population percentage: ${(data.filter(d => d.age >= "60-69").reduce((a, b) => a + b.total, 0) / total_population * 100).toFixed(2)}%`);
 
     function update_value(year) {
         current_year = year;
@@ -204,7 +204,7 @@
             .text(`Current Year: ${current_year} Total Population: ${total_population}`);
 
         svg.select(".sixty-population")
-            .text(`60 years and older population percentage: ${(data.filter(d => d.age >= "61-70").reduce((a, b) => a + b.total, 0) / total_population * 100).toFixed(2)}%`);
+            .text(`60 years and older population percentage: ${(data.filter(d => d.age >= "60-69").reduce((a, b) => a + b.total, 0) / total_population * 100).toFixed(2)}%`);
     }
 
     function update_state(new_state) {
