@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            background-color: aquamarine;
+            padding: 5px;
+            opacity: 0.9;
+            border-radius: 5px;
+        }
+    </style>
+    <title>Singapore Population By Age</title>
+</head>
+<body>
+<h1>Singapore Population and Population Structure</h1>
+<h2>By Age Group</h2>
+<div class="sidebar">
+    <label for="year-select">Select Year:</label><select id="year-select">
+    <option value="2010">2010</option>
+    <option value="2011">2011</option>
+    <option value="2012">2012</option>
+    <option value="2013">2013</option>
+    <option value="2014">2014</option>
+    <option value="2015">2015</option>
+    <option value="2016">2016</option>
+    <option value="2017">2017</option>
+    <option value="2018">2018</option>
+    <option value="2019">2019</option>
+    <option value="2020">2020</option>
+    <option value="2021">2021</option>
+    <option value="2022" selected="selected">2022</option>
+</select>
+</div>
+<div class="play">
+    <button id="play-button">Play</button>
+</div>
+<div id="container">
+    <svg></svg>
+</div>
+</body>
+<script type="module">
+    import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
+    let csv_data = await d3.csv("sg.csv");
+
+    function get_data(year) {
+        let data = csv_data.filter(d => d.year === current_year)[0]
+        let total_population = parseInt(data["Total Residents"].replaceAll(",", ""));
+        data = [
+            {
+                age: "0-10",
+                total: parseInt(data["0 - 4 Years"].replaceAll(",", "")) + parseInt(data["5 - 9 Years"].replaceAll(",", ""))
+            },
+            {
+                age: "11-20",
+                total: parseInt(data["10 - 14 Years"].replaceAll(",", "")) + parseInt(data["15 - 19 Years"].replaceAll(",", ""))
+            },
+            {
+                age: "21-30",
+                total: parseInt(data["20 - 24 Years"].replaceAll(",", "")) + parseInt(data["25 - 29 Years"].replaceAll(",", ""))
+            },
+            {
+                age: "31-40",
+                total: parseInt(data["30 - 34 Years"].replaceAll(",", "")) + parseInt(data["35 - 39 Years"].replaceAll(",", ""))
+            },
+            {
+                age: "41-50",
+                total: parseInt(data["40 - 44 Years"].replaceAll(",", "")) + parseInt(data["45 - 49 Years"].replaceAll(",", ""))
+            },
+            {
+                age: "51-60",
+                total: parseInt(data["50 - 54 Years"].replaceAll(",", "")) + parseInt(data["55 - 59 Years"].replaceAll(",", ""))
+            },
+            {
+                age: "61-70",
+                total: parseInt(data["60 - 64 Years"].replaceAll(",", "")) + parseInt(data["65 - 69 Years"].replaceAll(",", ""))
+            },
+            {
+                age: "71-80",
+                total: parseInt(data["70 - 74 Years"].replaceAll(",", "")) + parseInt(data["75 - 79 Years"].replaceAll(",", ""))
+            },
+            {
+                age: "81-90",
+                total: parseInt(data["80 - 84 Years"].replaceAll(",", "")) + parseInt(data["85 - 89 Years"].replaceAll(",", ""))
+            },
+            {age: "91 and above", total: parseInt(data["90 Years & Over"].replaceAll(",", ""))},
+        ];
+        return [data, total_population];
+    }
+
+    let current_year = d3.select("#year-select").property("value");
+    let [data, total_population] = get_data(current_year)
+
+
+    const svgSize = {
+        width: 960,
+        height: 960
+    };
+
+    const chartMargin = {
+        top: 50,
+        right: 30,
+        bottom: 30,
+        left: 80
+    };
+
+    const chartWidth = svgSize.width - chartMargin.left - chartMargin.right;
+    const chartHeight = svgSize.height - chartMargin.top - chartMargin.bottom;
+
+    let svg = d3.select("svg").attr("width", svgSize.width).attr("height", svgSize.height);
+
+    const xScale = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.total)])
+        .range([0, chartWidth]);
+
+    const yScale = d3.scaleBand()
+        .domain(data.map(d => d.age))
+        .range([0, chartHeight])
+        .padding(0.1);
+
+    const xAxis = d3.axisBottom(xScale);
+    const yAxis = d3.axisLeft(yScale);
+
+    svg.append("g")
+        .attr("transform", `translate(${chartMargin.left}, ${chartMargin.top + chartHeight})`)
+        .call(xAxis);
+
+    svg.append("g")
+        .attr("transform", `translate(${chartMargin.left}, ${chartMargin.top})`)
+        .call(yAxis);
+
+
+    svg.append("g")
+        .attr("fill", "lightblue")
+        .attr("transform", `translate(${chartMargin.left}, ${chartMargin.top})`)
+        .selectAll("rect")
+        .data(data)
+        .join("rect")
+        .attr("x", 0)
+        .attr("y", d => yScale(d.age))
+        .attr("width", d => xScale(d.total))
+        .attr("height", yScale.bandwidth());
+
+
+    const tooltip = d3.select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
+    svg.selectAll("rect")
+        .on("mouseover", function (event, d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", 0.9);
+            tooltip.html(`Age: ${d.age}<br/>Total: ${d.total}<br/> Percentage: ${(d.total / total_population * 100).toFixed(2)}%`)
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function (event, d) {
+            tooltip.transition()
+                .style("opacity", 0);
+        });
+
+    // highlight the bar for the age group that large than 60 years old
+    svg.selectAll("rect")
+        .filter(d => d.age >= "61-70")
+        .attr("fill", "red");
+
+    // show total population
+    svg.append("text")
+        .attr("class", "total-population")
+        .attr("x", chartMargin.left)
+        .attr("y", chartMargin.top - 10)
+        .attr("font-size", "20px")
+        .text(`Current Year: ${current_year} Total Population: ${total_population}`);
+
+    // show percentage beside the red bars
+    svg.append("text")
+        .attr("class", "sixty-population")
+        .attr("x", chartMargin.left + chartWidth - 700)
+        .attr("y", chartMargin.bottom + chartHeight - 10)
+        .attr("font-size", "20px")
+        .attr("fill", "red")
+        .text(`60 years and older population percentage: ${(data.filter(d => d.age >= "61-70").reduce((a, b) => a + b.total, 0) / total_population * 100).toFixed(2)}%`);
+
+    function update_value(year) {
+        current_year = year;
+
+        [data, total_population] = get_data(current_year);
+
+        svg.selectAll("rect")
+            .data(data)
+            .transition()
+            .duration(500)
+            .attr("width", d => xScale(d.total))
+            .attr("height", yScale.bandwidth());
+
+        // update total population text on the top
+        svg.select(".total-population")
+            .text(`Current Year: ${current_year} Total Population: ${total_population}`);
+
+        svg.select(".sixty-population")
+            .text(`60 years and older population percentage: ${(data.filter(d => d.age >= "61-70").reduce((a, b) => a + b.total, 0) / total_population * 100).toFixed(2)}%`);
+    }
+
+    function play_animation() {
+        for (let i = 2010; i <= 2022; i++) {
+            setTimeout(function () {
+                update_value(String(i));
+            }, 600 * (i - 2010));
+        }
+    }
+    play_animation();
+
+    d3.select("#play-button").on("click", function () {
+        play_animation();
+    });
+
+    d3.select("#year-select").on("change", function (event) {
+        const selectedYear = event.target.value;
+        update_value(selectedYear);
+    });
+</script>
+</html>
